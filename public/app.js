@@ -9,7 +9,6 @@ const sendBtn = document.getElementById("sendBtn");
 const themeToggleBtn = document.getElementById("themeToggleBtn");
 const defaultTeamIdEl = document.getElementById("defaultTeamId");
 const defaultBotIdEl = document.getElementById("defaultBotId");
-const configHintEl = document.getElementById("configHint");
 
 const finalUrlLabel = document.getElementById("finalUrlLabel");
 const curlPreviewEl = document.getElementById("curlPreview");
@@ -18,6 +17,7 @@ const statusLabel = document.getElementById("statusLabel");
 const timeLabel = document.getElementById("timeLabel");
 const responseHeadersEl = document.getElementById("responseHeaders");
 const responseBodyEl = document.getElementById("responseBody");
+
 const THEME_STORAGE_KEY = "docsbot-api-utility-theme";
 const USER_CONFIG_STORAGE_KEY = "docsbot-api-utility-user-config";
 
@@ -34,6 +34,13 @@ function readStoredUserConfig() {
   }
 }
 
+function applyStoredUserConfig() {
+  const stored = readStoredUserConfig();
+  bearerTokenEl.value = stored?.bearerToken ? String(stored.bearerToken) : "";
+  defaultTeamIdEl.value = stored?.teamId ? String(stored.teamId) : "";
+  defaultBotIdEl.value = stored?.botId ? String(stored.botId) : "";
+}
+
 function persistUserConfig() {
   const data = {
     bearerToken: bearerTokenEl.value,
@@ -41,51 +48,6 @@ function persistUserConfig() {
     botId: defaultBotIdEl.value
   };
   localStorage.setItem(USER_CONFIG_STORAGE_KEY, JSON.stringify(data));
-}
-
-function normalizeRuntimeConfig(config) {
-  return {
-    bearerToken: config?.bearerToken ? String(config.bearerToken) : "",
-    teamId: config?.teamId ? String(config.teamId) : "",
-    botId: config?.botId ? String(config.botId) : "",
-    hasEnvFile: Boolean(config?.hasEnvFile)
-  };
-}
-
-function mergeServerAndUserConfig(serverConfig, userConfig) {
-  const merged = {
-    bearerToken: serverConfig.bearerToken,
-    teamId: serverConfig.teamId,
-    botId: serverConfig.botId
-  };
-  for (const key of ["bearerToken", "teamId", "botId"]) {
-    if (Object.prototype.hasOwnProperty.call(userConfig, key)) {
-      merged[key] = String(userConfig[key] ?? "");
-    }
-  }
-  return merged;
-}
-
-async function initRuntimeConfig() {
-  let serverConfig = normalizeRuntimeConfig({});
-  try {
-    const response = await fetch("/api/config");
-    if (response.ok) {
-      const data = await response.json();
-      serverConfig = normalizeRuntimeConfig(data?.config);
-    }
-  } catch (_error) {
-    serverConfig = normalizeRuntimeConfig({});
-  }
-
-  const storedUserConfig = readStoredUserConfig();
-  const merged = mergeServerAndUserConfig(serverConfig, storedUserConfig);
-  bearerTokenEl.value = merged.bearerToken;
-  defaultTeamIdEl.value = merged.teamId;
-  defaultBotIdEl.value = merged.botId;
-  configHintEl.textContent = serverConfig.hasEnvFile
-    ? "Loaded .env defaults. Frontend values override them."
-    : "No .env found. Using frontend values.";
 }
 
 function getDefaultPathParamValue(name) {
@@ -303,6 +265,7 @@ themeToggleBtn.addEventListener("click", () => {
   const current = document.documentElement.getAttribute("data-theme") || "light";
   setTheme(current === "dark" ? "light" : "dark");
 });
+
 bearerTokenEl.addEventListener("input", persistUserConfig);
 defaultTeamIdEl.addEventListener("input", () => {
   persistUserConfig();
@@ -314,7 +277,6 @@ defaultBotIdEl.addEventListener("input", () => {
 });
 
 queryParamsContainer.appendChild(createQueryRow());
+applyStoredUserConfig();
+renderPathParams();
 initTheme();
-initRuntimeConfig().finally(() => {
-  renderPathParams();
-});

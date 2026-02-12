@@ -86,6 +86,8 @@ function loadEnvConfig() {
   };
 }
 
+const STARTUP_ENV_CONFIG = loadEnvConfig();
+
 function sendJson(res, statusCode, payload) {
   const data = JSON.stringify(payload);
   res.writeHead(statusCode, {
@@ -344,16 +346,23 @@ async function handleApiCall(req, res) {
   }
 
   const pathParamsFromPayload = pathParams && typeof pathParams === "object" ? pathParams : {};
-  const built = buildUrl(String(urlTemplate).trim(), pathParamsFromPayload, queryParams);
+  const envConfig = STARTUP_ENV_CONFIG;
+  const effectivePathParams = { ...pathParamsFromPayload };
+  if (!effectivePathParams.teamId || String(effectivePathParams.teamId).trim() === "") {
+    effectivePathParams.teamId = envConfig.teamId;
+  }
+  if (!effectivePathParams.botId || String(effectivePathParams.botId).trim() === "") {
+    effectivePathParams.botId = envConfig.botId;
+  }
+
+  const built = buildUrl(String(urlTemplate).trim(), effectivePathParams, queryParams);
   if (built.error) {
     sendJson(res, 400, { error: built.error });
     return;
   }
 
   const finalUrl = built.url;
-  const hasBearerTokenField = Object.prototype.hasOwnProperty.call(payload || {}, "bearerToken");
-  const envConfig = loadEnvConfig();
-  const effectiveBearerToken = hasBearerTokenField ? String(bearerToken ?? "") : envConfig.bearerToken;
+  const effectiveBearerToken = firstNonEmpty(bearerToken, envConfig.bearerToken);
   const curlArgs = buildCurlArgs({
     method,
     finalUrl,
@@ -437,11 +446,6 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname === "/api/call" && req.method === "POST") {
     await handleApiCall(req, res);
-    return;
-  }
-
-  if (pathname === "/api/config" && req.method === "GET") {
-    sendJson(res, 200, { config: loadEnvConfig() });
     return;
   }
 
