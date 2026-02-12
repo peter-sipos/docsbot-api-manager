@@ -1,0 +1,10 @@
+{
+  "name": "docsbot-api-utility-codex",
+  "version": "1.0.0",
+  "description": "Simple SPA API utility that executes requests via curl.",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

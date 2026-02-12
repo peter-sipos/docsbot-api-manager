@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DocsBot API Utility</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <div class="hero-top">
+          <h1>DocsBot API Utility</h1>
+          <button id="themeToggleBtn" type="button" class="theme-toggle">Dark Theme</button>
+        </div>
+        <p>Build and run API calls via <code>curl</code>.</p>
+      </header>
+
+      <section class="card request-builder">
+        <div class="row">
+          <label for="method">Method</label>
+          <select id="method">
+            <option value="GET" selected>GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+          </select>
+        </div>
+
+        <div class="row grow">
+          <label for="urlTemplate">URL Template</label>
+          <input
+            id="urlTemplate"
+            type="text"
+            placeholder="https://docsbot.ai/api/teams/:teamId/bots/:botId/conversations/:conversationId"
+          />
+        </div>
+
+        <div class="row">
+          <label for="bearerToken">Bearer Token</label>
+          <input id="bearerToken" type="password" placeholder="Enter your secret token" />
+        </div>
+      </section>
+
+      <section class="card defaults-builder">
+        <div class="row">
+          <label for="defaultTeamId">Default Team ID</label>
+          <input id="defaultTeamId" type="text" placeholder="team_..." />
+        </div>
+        <div class="row">
+          <label for="defaultBotId">Default Bot ID</label>
+          <input id="defaultBotId" type="text" placeholder="bot_..." />
+        </div>
+        <small id="configHint" class="config-hint">Using frontend values.</small>
+      </section>
+
+      <section class="grid-two">
+        <section class="card">
+          <h2>Path Parameters</h2>
+          <div id="pathParamsContainer" class="stack"></div>
+        </section>
+
+        <section class="card">
+          <div class="title-row">
+            <h2>Query Parameters</h2>
+            <button id="addQueryParamBtn" type="button">Add</button>
+          </div>
+          <div id="queryParamsContainer" class="stack"></div>
+        </section>
+      </section>
+
+      <section class="card">
+        <div class="title-row">
+          <h2>Request Body</h2>
+          <small>Used for POST/PUT/DELETE</small>
+        </div>
+        <textarea
+          id="requestBody"
+          rows="10"
+          placeholder='{"message":"Hello from API utility"}'
+        ></textarea>
+      </section>
+
+      <section class="actions">
+        <button id="sendBtn" type="button">Send Request</button>
+      </section>
+
+      <section class="results-grid">
+        <section class="card request-preview-card">
+          <h2>Request Preview</h2>
+          <div class="meta">
+            <span id="finalUrlLabel">Final URL: -</span>
+          </div>
+          <h3>Curl Command</h3>
+          <pre id="curlPreview" class="compact-pre">-</pre>
+          <h3>Request Body Sent</h3>
+          <pre id="requestBodyPreview" class="compact-pre">-</pre>
+        </section>
+
+        <section class="card response-card">
+          <h2>Response</h2>
+          <div class="meta">
+            <span id="statusLabel">Status: -</span>
+            <span id="timeLabel">Time: -</span>
+          </div>
+          <h3>Headers</h3>
+          <pre id="responseHeaders" class="response-headers-pre">-</pre>
+          <h3>Body</h3>
+          <pre id="responseBody" class="response-body-pre">-</pre>
+        </section>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
