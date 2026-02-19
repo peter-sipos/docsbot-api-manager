@@ -9,6 +9,8 @@ const sendBtn = document.getElementById("sendBtn");
 const themeToggleBtn = document.getElementById("themeToggleBtn");
 const defaultTeamIdEl = document.getElementById("defaultTeamId");
 const defaultBotIdEl = document.getElementById("defaultBotId");
+const endpointPickerBtn = document.getElementById("endpointPickerBtn");
+const endpointDropdown = document.getElementById("endpointDropdown");
 
 const finalUrlLabel = document.getElementById("finalUrlLabel");
 const curlPreviewEl = document.getElementById("curlPreview");
@@ -20,6 +22,116 @@ const responseBodyEl = document.getElementById("responseBody");
 
 const THEME_STORAGE_KEY = "docsbot-api-utility-theme";
 const USER_CONFIG_STORAGE_KEY = "docsbot-api-utility-user-config";
+const STARRED_STORAGE_KEY = "docsbot-api-utility-starred";
+
+const DOCSBOT_ENDPOINTS = [
+  {
+    group: "Chat",
+    endpoints: [
+      { method: "POST", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/chat", label: "Chat" },
+      { method: "POST", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/chat-agent", label: "Chat Agent" },
+      { method: "POST", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/search", label: "Semantic Search" }
+    ]
+  },
+  {
+    group: "Answer Rating",
+    endpoints: [
+      { method: "PUT", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/rate/:answerId", label: "Rate Answer" },
+      { method: "PUT", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/support/:answerId", label: "Support Escalation" }
+    ]
+  },
+  {
+    group: "Conversation Actions",
+    endpoints: [
+      { method: "GET", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/conversations/:conversationId/summarize", label: "Summarize Conversation" },
+      { method: "GET", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/conversations/:conversationId/ticket", label: "Get Conversation Ticket" },
+      { method: "POST", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/conversations/:conversationId/lead", label: "Capture Lead" }
+    ]
+  },
+  {
+    group: "Teams",
+    endpoints: [
+      { method: "GET", path: "https://docsbot.ai/api/teams", label: "List Teams" },
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId", label: "Get Team" },
+      { method: "PUT", path: "https://docsbot.ai/api/teams/:teamId", label: "Update Team" }
+    ]
+  },
+  {
+    group: "Team Members",
+    endpoints: [
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/members", label: "List Members" },
+      { method: "PUT", path: "https://docsbot.ai/api/teams/:teamId/members", label: "Update Member Role" },
+      { method: "DELETE", path: "https://docsbot.ai/api/teams/:teamId/members", label: "Remove Member" },
+      { method: "POST", path: "https://docsbot.ai/api/teams/:teamId/invite", label: "Invite Member" },
+      { method: "PUT", path: "https://docsbot.ai/api/teams/:teamId/invite", label: "Respond to Invite" }
+    ]
+  },
+  {
+    group: "Bots",
+    endpoints: [
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots", label: "List Bots" },
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId", label: "Get Bot" },
+      { method: "POST", path: "https://docsbot.ai/api/teams/:teamId/bots", label: "Create Bot" },
+      { method: "PUT", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId", label: "Update Bot" },
+      { method: "DELETE", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId", label: "Delete Bot" }
+    ]
+  },
+  {
+    group: "Sources",
+    endpoints: [
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/sources", label: "List Sources" },
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/sources/:sourceId", label: "Get Source" },
+      { method: "POST", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/sources", label: "Create Source" },
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/upload-url", label: "Get Upload URL" },
+      { method: "PUT", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/sources/:sourceId", label: "Retry Source" },
+      { method: "DELETE", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/sources/:sourceId", label: "Delete Source" }
+    ]
+  },
+  {
+    group: "Questions",
+    endpoints: [
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/questions", label: "List Questions" },
+      { method: "DELETE", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/questions/:questionId", label: "Delete Question" }
+    ]
+  },
+  {
+    group: "Conversations",
+    endpoints: [
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/conversations", label: "List Conversations" },
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/conversations/:conversationId", label: "Get Conversation" },
+      { method: "DELETE", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/conversations/:conversationId", label: "Delete Conversation" }
+    ]
+  },
+  {
+    group: "Leads",
+    endpoints: [
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/leads", label: "List Leads" },
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/leads/export", label: "Export Leads CSV" },
+      { method: "DELETE", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/leads/:leadId", label: "Delete Lead" }
+    ]
+  },
+  {
+    group: "Webhooks",
+    endpoints: [
+      { method: "POST", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/webhooks", label: "Create Webhook" },
+      { method: "DELETE", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/webhooks/:webhookId", label: "Delete Webhook" }
+    ]
+  },
+  {
+    group: "Research",
+    endpoints: [
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/research", label: "List Research Jobs" },
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/research/:jobId", label: "Get Research Job" }
+    ]
+  },
+  {
+    group: "Stats & Reports",
+    endpoints: [
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/stats", label: "Get Bot Statistics" },
+      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/reports", label: "Get Bot Reports" }
+    ]
+  }
+];
 
 function readStoredUserConfig() {
   try {
@@ -293,6 +405,165 @@ function applyEnvHints() {
     }
   }
 }
+
+// ---- Endpoint Picker ----
+
+function readStarred() {
+  try {
+    const raw = localStorage.getItem(STARRED_STORAGE_KEY);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch (_error) {
+    return new Set();
+  }
+}
+
+function writeStarred(set) {
+  localStorage.setItem(STARRED_STORAGE_KEY, JSON.stringify([...set]));
+}
+
+function toggleStar(key) {
+  const starred = readStarred();
+  if (starred.has(key)) {
+    starred.delete(key);
+  } else {
+    starred.add(key);
+  }
+  writeStarred(starred);
+}
+
+function endpointMatchesFilter(ep, filter) {
+  return (
+    ep.label.toLowerCase().includes(filter) ||
+    ep.method.toLowerCase().includes(filter) ||
+    ep.path.toLowerCase().includes(filter)
+  );
+}
+
+function renderEndpointItem(ep, isStarred) {
+  const key = escapeHtml(`${ep.method}|${ep.path}`);
+  const methodClass = `method-${ep.method.toLowerCase()}`;
+  return `<div class="ep-item" data-key="${key}" data-method="${escapeHtml(ep.method)}" data-path="${escapeHtml(ep.path)}">
+      <button type="button" class="ep-star ${isStarred ? "starred" : ""}">${isStarred ? "\u2605" : "\u2606"}</button>
+      <span class="ep-method ${methodClass}">${escapeHtml(ep.method)}</span>
+      <span class="ep-label">${escapeHtml(ep.label)}</span>
+    </div>`;
+}
+
+function renderEndpointList(filter) {
+  const listEl = endpointDropdown.querySelector(".ep-list");
+  if (!listEl) return;
+  const starred = readStarred();
+  const lowerFilter = filter.toLowerCase().trim();
+
+  let html = "";
+
+  if (starred.size > 0) {
+    const starredItems = [];
+    for (const group of DOCSBOT_ENDPOINTS) {
+      for (const ep of group.endpoints) {
+        if (starred.has(`${ep.method}|${ep.path}`)) {
+          starredItems.push(ep);
+        }
+      }
+    }
+    const filtered = lowerFilter
+      ? starredItems.filter((ep) => endpointMatchesFilter(ep, lowerFilter))
+      : starredItems;
+    if (filtered.length > 0) {
+      html += `<div class="ep-group"><div class="ep-group-header starred-header">\u2605 Starred</div>`;
+      for (const ep of filtered) {
+        html += renderEndpointItem(ep, true);
+      }
+      html += `</div>`;
+    }
+  }
+
+  for (const group of DOCSBOT_ENDPOINTS) {
+    const filtered = lowerFilter
+      ? group.endpoints.filter((ep) => endpointMatchesFilter(ep, lowerFilter))
+      : group.endpoints;
+    if (filtered.length === 0) continue;
+    html += `<div class="ep-group"><div class="ep-group-header">${escapeHtml(group.group)}</div>`;
+    for (const ep of filtered) {
+      html += renderEndpointItem(ep, starred.has(`${ep.method}|${ep.path}`));
+    }
+    html += `</div>`;
+  }
+
+  if (!html) {
+    html = `<div class="ep-no-results">No endpoints match your search.</div>`;
+  }
+  listEl.innerHTML = html;
+}
+
+function openEndpointDropdown() {
+  endpointDropdown.innerHTML = `<input type="text" class="ep-search" placeholder="Search endpoints..." /><div class="ep-list"></div>`;
+  endpointDropdown.classList.remove("hidden");
+  endpointPickerBtn.classList.add("active");
+
+  const searchInput = endpointDropdown.querySelector(".ep-search");
+  searchInput.focus();
+  searchInput.addEventListener("input", () => {
+    renderEndpointList(searchInput.value);
+  });
+
+  renderEndpointList("");
+}
+
+function closeEndpointDropdown() {
+  endpointDropdown.classList.add("hidden");
+  endpointPickerBtn.classList.remove("active");
+}
+
+function selectEndpoint(method, path) {
+  methodEl.value = method;
+  urlTemplateEl.value = path;
+  renderPathParams();
+}
+
+endpointPickerBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  if (endpointDropdown.classList.contains("hidden")) {
+    openEndpointDropdown();
+  } else {
+    closeEndpointDropdown();
+  }
+});
+
+endpointDropdown.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const starBtn = e.target.closest(".ep-star");
+  if (starBtn) {
+    const item = starBtn.closest(".ep-item");
+    if (item) {
+      toggleStar(item.dataset.key);
+      const searchInput = endpointDropdown.querySelector(".ep-search");
+      renderEndpointList(searchInput ? searchInput.value : "");
+    }
+    return;
+  }
+  const item = e.target.closest(".ep-item");
+  if (item) {
+    selectEndpoint(item.dataset.method, item.dataset.path);
+    closeEndpointDropdown();
+  }
+});
+
+document.addEventListener("click", (e) => {
+  if (
+    !endpointDropdown.classList.contains("hidden") &&
+    !endpointDropdown.contains(e.target) &&
+    !endpointPickerBtn.contains(e.target)
+  ) {
+    closeEndpointDropdown();
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !endpointDropdown.classList.contains("hidden")) {
+    closeEndpointDropdown();
+  }
+});
 
 addQueryParamBtn.addEventListener("click", () => {
   queryParamsContainer.appendChild(createQueryRow());

@@ -27,13 +27,17 @@
           </select>
         </div>
 
-        <div class="row grow">
+        <div class="row grow endpoint-row">
           <label for="urlTemplate">URL Template</label>
-          <input
-            id="urlTemplate"
-            type="text"
-            placeholder="https://docsbot.ai/api/teams/:teamId/bots/:botId/conversations/:conversationId"
-          />
+          <div class="url-input-wrap">
+            <input
+              id="urlTemplate"
+              type="text"
+              placeholder="https://docsbot.ai/api/teams/:teamId/bots/:botId/conversations/:conversationId"
+            />
+            <button id="endpointPickerBtn" type="button" title="Browse API endpoints" class="picker-btn">&#9662;</button>
+          </div>
+          <div id="endpointDropdown" class="endpoint-dropdown hidden"></div>
         </div>
 
         <div class="row">
