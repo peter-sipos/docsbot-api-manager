@@ -462,14 +462,18 @@ function renderPathParams() {
   }
 
   pathParamsContainer.innerHTML = "";
-  if (names.length === 0) {
+
+  // Filter out teamId and botId since they're in the defaults section
+  const filteredNames = names.filter(name => name !== "teamId" && name !== "botId");
+
+  if (filteredNames.length === 0) {
     const empty = document.createElement("small");
-    empty.textContent = "No :pathParams detected in URL template.";
+    empty.textContent = "No additional path parameters detected.";
     pathParamsContainer.appendChild(empty);
     return;
   }
 
-  for (const name of names) {
+  for (const name of filteredNames) {
     const row = document.createElement("div");
     row.className = "path-row";
     const safeName = escapeHtml(name);
