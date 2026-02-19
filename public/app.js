@@ -498,6 +498,17 @@ function escapeHtml(value) {
 
 function collectPathParams() {
   const out = {};
+
+  // Always collect teamId and botId from the default fields
+  const allParamNames = parsePathParamNames(urlTemplateEl.value.trim());
+  if (allParamNames.includes("teamId")) {
+    out.teamId = defaultTeamIdEl.value || "";
+  }
+  if (allParamNames.includes("botId")) {
+    out.botId = defaultBotIdEl.value || "";
+  }
+
+  // Collect other path params from the Path Parameters section
   const inputs = pathParamsContainer.querySelectorAll("input[data-param-name]");
   for (const input of inputs) {
     const name = input.dataset.paramName;
