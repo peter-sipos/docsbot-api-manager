@@ -252,6 +252,48 @@ async function sendRequest() {
   }
 }
 
+function applyEnvHints() {
+  const hints = window.__ENV_HINTS__;
+  if (!hints) {
+    return;
+  }
+
+  const fields = [
+    { flag: hints.hasBearerToken, inputEl: bearerTokenEl, labelFor: "bearerToken" },
+    { flag: hints.hasTeamId, inputEl: defaultTeamIdEl, labelFor: "defaultTeamId" },
+    { flag: hints.hasBotId, inputEl: defaultBotIdEl, labelFor: "defaultBotId" }
+  ];
+
+  let anySet = false;
+  for (const { flag, inputEl, labelFor } of fields) {
+    if (!flag) {
+      continue;
+    }
+    anySet = true;
+
+    const labelEl = document.querySelector(`label[for="${labelFor}"]`);
+    if (labelEl) {
+      const badge = document.createElement("span");
+      badge.className = "env-badge";
+      badge.textContent = ".env";
+      badge.title = "A fallback value is set in the server .env file";
+      labelEl.appendChild(badge);
+    }
+
+    if (!inputEl.value) {
+      inputEl.placeholder = "Using value from .env file";
+    }
+  }
+
+  if (anySet) {
+    const hintEl = document.getElementById("configHint");
+    if (hintEl) {
+      hintEl.textContent =
+        "Values are stored in your browser. Empty fields fall back to the server .env file.";
+    }
+  }
+}
+
 addQueryParamBtn.addEventListener("click", () => {
   queryParamsContainer.appendChild(createQueryRow());
 });
@@ -278,5 +320,6 @@ defaultBotIdEl.addEventListener("input", () => {
 
 queryParamsContainer.appendChild(createQueryRow());
 applyStoredUserConfig();
+applyEnvHints();
 renderPathParams();
 initTheme();

@@ -306,6 +306,30 @@ async function serveStatic(req, res, pathname) {
     return false;
   }
 
+  if (candidatePath.endsWith("index.html")) {
+    const html = await fs.promises.readFile(candidatePath, "utf8");
+    const envHints = JSON.stringify({
+      hasBearerToken: STARTUP_ENV_CONFIG.bearerToken !== "",
+      hasTeamId: STARTUP_ENV_CONFIG.teamId !== "",
+      hasBotId: STARTUP_ENV_CONFIG.botId !== ""
+    });
+    const injectedHtml = html.replace(
+      "</head>",
+      `  <script>window.__ENV_HINTS__=${envHints};</script>\n  </head>`
+    );
+    const buf = Buffer.from(injectedHtml, "utf8");
+    res.writeHead(200, {
+      "Content-Type": "text/html; charset=utf-8",
+      "Content-Length": buf.length
+    });
+    if (req.method === "HEAD") {
+      res.end();
+      return true;
+    }
+    res.end(buf);
+    return true;
+  }
+
   const ext = path.extname(candidatePath).toLowerCase();
   const mime = MIME_TYPES[ext] || "application/octet-stream";
   res.writeHead(200, {
