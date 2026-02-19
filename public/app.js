@@ -28,107 +28,369 @@ const DOCSBOT_ENDPOINTS = [
   {
     group: "Chat",
     endpoints: [
-      { method: "POST", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/chat", label: "Chat" },
-      { method: "POST", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/chat-agent", label: "Chat Agent" },
-      { method: "POST", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/search", label: "Semantic Search" }
+      {
+        method: "POST",
+        path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/chat",
+        label: "Chat (Legacy)",
+        queryParams: []
+      },
+      {
+        method: "POST",
+        path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/chat-agent",
+        label: "Chat Agent",
+        queryParams: []
+      },
+      {
+        method: "POST",
+        path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/search",
+        label: "Semantic Search",
+        queryParams: [
+          { key: "top_k", description: "Number of results (default: 4)" },
+          { key: "autocut", description: "Organize results by groups" },
+          { key: "alpha", description: "Balance keyword(0) vs semantic(1) search (default: 0.75)" },
+          { key: "use_glossary", description: "Use bot's glossary (default: false)" }
+        ]
+      }
     ]
   },
   {
     group: "Answer Rating",
     endpoints: [
-      { method: "PUT", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/rate/:answerId", label: "Rate Answer" },
-      { method: "PUT", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/support/:answerId", label: "Support Escalation" }
+      {
+        method: "PUT",
+        path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/rate/:answerId",
+        label: "Rate Answer",
+        queryParams: []
+      },
+      {
+        method: "PUT",
+        path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/support/:answerId",
+        label: "Support Escalation",
+        queryParams: []
+      }
     ]
   },
   {
     group: "Conversation Actions",
     endpoints: [
-      { method: "GET", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/conversations/:conversationId/summarize", label: "Summarize Conversation" },
-      { method: "GET", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/conversations/:conversationId/ticket", label: "Get Conversation Ticket" },
-      { method: "POST", path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/conversations/:conversationId/lead", label: "Capture Lead" }
+      {
+        method: "GET",
+        path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/conversations/:conversationId/summarize",
+        label: "Summarize Conversation",
+        queryParams: []
+      },
+      {
+        method: "GET",
+        path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/conversations/:conversationId/ticket",
+        label: "Get Conversation Ticket",
+        queryParams: []
+      },
+      {
+        method: "POST",
+        path: "https://api.docsbot.ai/teams/:teamId/bots/:botId/conversations/:conversationId/lead",
+        label: "Capture Lead",
+        queryParams: []
+      }
     ]
   },
   {
     group: "Teams",
     endpoints: [
-      { method: "GET", path: "https://docsbot.ai/api/teams", label: "List Teams" },
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId", label: "Get Team" },
-      { method: "PUT", path: "https://docsbot.ai/api/teams/:teamId", label: "Update Team" }
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams",
+        label: "List Teams",
+        queryParams: []
+      },
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId",
+        label: "Get Team",
+        queryParams: []
+      },
+      {
+        method: "PUT",
+        path: "https://docsbot.ai/api/teams/:teamId",
+        label: "Update Team",
+        queryParams: []
+      }
     ]
   },
   {
     group: "Team Members",
     endpoints: [
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/members", label: "List Members" },
-      { method: "PUT", path: "https://docsbot.ai/api/teams/:teamId/members", label: "Update Member Role" },
-      { method: "DELETE", path: "https://docsbot.ai/api/teams/:teamId/members", label: "Remove Member" },
-      { method: "POST", path: "https://docsbot.ai/api/teams/:teamId/invite", label: "Invite Member" },
-      { method: "PUT", path: "https://docsbot.ai/api/teams/:teamId/invite", label: "Respond to Invite" }
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/members",
+        label: "List Members",
+        queryParams: []
+      },
+      {
+        method: "PUT",
+        path: "https://docsbot.ai/api/teams/:teamId/members",
+        label: "Update Member Role",
+        queryParams: []
+      },
+      {
+        method: "DELETE",
+        path: "https://docsbot.ai/api/teams/:teamId/members",
+        label: "Remove Member",
+        queryParams: [
+          { key: "removeUserId", description: "User ID to remove" },
+          { key: "removeUserEmail", description: "User email to remove" }
+        ]
+      },
+      {
+        method: "POST",
+        path: "https://docsbot.ai/api/teams/:teamId/invite",
+        label: "Invite Member",
+        queryParams: []
+      },
+      {
+        method: "PUT",
+        path: "https://docsbot.ai/api/teams/:teamId/invite",
+        label: "Respond to Invite",
+        queryParams: []
+      }
     ]
   },
   {
     group: "Bots",
     endpoints: [
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots", label: "List Bots" },
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId", label: "Get Bot" },
-      { method: "POST", path: "https://docsbot.ai/api/teams/:teamId/bots", label: "Create Bot" },
-      { method: "PUT", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId", label: "Update Bot" },
-      { method: "DELETE", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId", label: "Delete Bot" }
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots",
+        label: "List Bots",
+        queryParams: []
+      },
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId",
+        label: "Get Bot",
+        queryParams: []
+      },
+      {
+        method: "POST",
+        path: "https://docsbot.ai/api/teams/:teamId/bots",
+        label: "Create Bot",
+        queryParams: []
+      },
+      {
+        method: "PUT",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId",
+        label: "Update Bot",
+        queryParams: []
+      },
+      {
+        method: "DELETE",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId",
+        label: "Delete Bot",
+        queryParams: []
+      }
     ]
   },
   {
     group: "Sources",
     endpoints: [
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/sources", label: "List Sources" },
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/sources/:sourceId", label: "Get Source" },
-      { method: "POST", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/sources", label: "Create Source" },
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/upload-url", label: "Get Upload URL" },
-      { method: "PUT", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/sources/:sourceId", label: "Retry Source" },
-      { method: "DELETE", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/sources/:sourceId", label: "Delete Source" }
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/sources",
+        label: "List Sources",
+        queryParams: []
+      },
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/sources/:sourceId",
+        label: "Get Source",
+        queryParams: []
+      },
+      {
+        method: "POST",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/sources",
+        label: "Create Source",
+        queryParams: []
+      },
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/upload-url",
+        label: "Get Upload URL",
+        queryParams: [
+          { key: "fileName", description: "Name of file to upload (required)" }
+        ]
+      },
+      {
+        method: "PUT",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/sources/:sourceId",
+        label: "Retry Source",
+        queryParams: []
+      },
+      {
+        method: "DELETE",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/sources/:sourceId",
+        label: "Delete Source",
+        queryParams: []
+      }
     ]
   },
   {
     group: "Questions",
     endpoints: [
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/questions", label: "List Questions" },
-      { method: "DELETE", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/questions/:questionId", label: "Delete Question" }
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/questions",
+        label: "List Questions",
+        queryParams: [
+          { key: "page", description: "Page number (0-indexed, default: 0)" },
+          { key: "perPage", description: "Results per page (default: 50)" },
+          { key: "ip", description: "Filter by SHA256-hashed IP" },
+          { key: "rating", description: "Filter by rating: -1, 0, or 1" },
+          { key: "escalated", description: "Filter by escalation: true/false" },
+          { key: "couldAnswer", description: "Filter by bot capability: true/false" },
+          { key: "startDate", description: "Start date (ISO 8601 or YYYY-MM-DD)" },
+          { key: "endDate", description: "End date (ISO 8601 or YYYY-MM-DD)" }
+        ]
+      },
+      {
+        method: "DELETE",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/questions/:questionId",
+        label: "Delete Question",
+        queryParams: []
+      }
     ]
   },
   {
     group: "Conversations",
     endpoints: [
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/conversations", label: "List Conversations" },
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/conversations/:conversationId", label: "Get Conversation" },
-      { method: "DELETE", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/conversations/:conversationId", label: "Delete Conversation" }
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/conversations",
+        label: "List Conversations",
+        queryParams: [
+          { key: "page", description: "Page number (0-indexed, default: 0)" },
+          { key: "perPage", description: "Results per page (default: 25)" }
+        ]
+      },
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/conversations/:conversationId",
+        label: "Get Conversation",
+        queryParams: []
+      },
+      {
+        method: "DELETE",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/conversations/:conversationId",
+        label: "Delete Conversation",
+        queryParams: []
+      }
     ]
   },
   {
     group: "Leads",
     endpoints: [
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/leads", label: "List Leads" },
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/leads/export", label: "Export Leads CSV" },
-      { method: "DELETE", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/leads/:leadId", label: "Delete Lead" }
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/leads",
+        label: "List Leads",
+        queryParams: [
+          { key: "page", description: "Page number (0-indexed, default: 0)" },
+          { key: "perPage", description: "Results per page (default: 50)" },
+          { key: "startDate", description: "Start date filter (ISO 8601)" },
+          { key: "endDate", description: "End date filter (ISO 8601)" }
+        ]
+      },
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/leads/export",
+        label: "Export Leads CSV",
+        queryParams: [
+          { key: "startDate", description: "Start date (ISO 8601, required)" },
+          { key: "endDate", description: "End date (ISO 8601, required)" }
+        ]
+      },
+      {
+        method: "DELETE",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/leads/:leadId",
+        label: "Delete Lead",
+        queryParams: []
+      }
     ]
   },
   {
     group: "Webhooks",
     endpoints: [
-      { method: "POST", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/webhooks", label: "Create Webhook" },
-      { method: "DELETE", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/webhooks/:webhookId", label: "Delete Webhook" }
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/webhooks",
+        label: "List Webhooks",
+        queryParams: []
+      },
+      {
+        method: "POST",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/webhooks",
+        label: "Create Webhook",
+        queryParams: []
+      },
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/webhooks/:webhookId",
+        label: "Get Webhook",
+        queryParams: []
+      },
+      {
+        method: "PATCH",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/webhooks/:webhookId",
+        label: "Update Webhook",
+        queryParams: []
+      },
+      {
+        method: "DELETE",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/webhooks/:webhookId",
+        label: "Delete Webhook",
+        queryParams: []
+      }
     ]
   },
   {
     group: "Research",
     endpoints: [
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/research", label: "List Research Jobs" },
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/research/:jobId", label: "Get Research Job" }
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/research",
+        label: "List Research Jobs",
+        queryParams: [
+          { key: "page", description: "Page number (0-indexed)" },
+          { key: "perPage", description: "Results per page" }
+        ]
+      },
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/research/:jobId",
+        label: "Get Research Job",
+        queryParams: []
+      }
     ]
   },
   {
     group: "Stats & Reports",
     endpoints: [
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/stats", label: "Get Bot Statistics" },
-      { method: "GET", path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/reports", label: "Get Bot Reports" }
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/stats",
+        label: "Get Bot Statistics",
+        queryParams: [
+          { key: "timeDelta", description: "Time period in days (7, 30, 90, 365)" },
+          { key: "startDate", description: "Start date (ISO 8601 or YYYY-MM-DD)" },
+          { key: "endDate", description: "End date (ISO 8601 or YYYY-MM-DD)" }
+        ]
+      },
+      {
+        method: "GET",
+        path: "https://docsbot.ai/api/teams/:teamId/bots/:botId/reports",
+        label: "Get Bot Reports",
+        queryParams: [
+          { key: "month", description: "Report month (YYYY-MM format)" }
+        ]
+      }
     ]
   }
 ];
@@ -508,6 +770,24 @@ function openEndpointDropdown() {
   });
 
   renderEndpointList("");
+
+  // Scroll to currently selected endpoint
+  const currentMethod = methodEl.value;
+  const currentPath = urlTemplateEl.value.trim();
+  if (currentMethod && currentPath) {
+    setTimeout(() => {
+      const currentKey = `${currentMethod}|${currentPath}`;
+      const listEl = endpointDropdown.querySelector(".ep-list");
+      const currentItem = listEl ? listEl.querySelector(`[data-key="${escapeHtml(currentKey)}"]`) : null;
+      if (currentItem) {
+        currentItem.scrollIntoView({ block: "center", behavior: "smooth" });
+        currentItem.style.background = "var(--card-soft)";
+        setTimeout(() => {
+          currentItem.style.background = "";
+        }, 1500);
+      }
+    }, 50);
+  }
 }
 
 function closeEndpointDropdown() {
@@ -515,10 +795,85 @@ function closeEndpointDropdown() {
   endpointPickerBtn.classList.remove("active");
 }
 
+function getCurrentEndpoint() {
+  const currentMethod = methodEl.value;
+  const currentPath = urlTemplateEl.value.trim();
+  if (!currentMethod || !currentPath) return null;
+
+  for (const group of DOCSBOT_ENDPOINTS) {
+    for (const ep of group.endpoints) {
+      if (ep.method === currentMethod && ep.path === currentPath) {
+        return ep;
+      }
+    }
+  }
+  return null;
+}
+
 function selectEndpoint(method, path) {
   methodEl.value = method;
   urlTemplateEl.value = path;
   renderPathParams();
+  renderAvailableQueryParams();
+}
+
+function renderAvailableQueryParams() {
+  const currentEp = getCurrentEndpoint();
+  const availableParams = currentEp?.queryParams || [];
+
+  // Get existing param rows
+  const existingRows = queryParamsContainer.querySelectorAll(".param-row");
+
+  // Clear container
+  queryParamsContainer.innerHTML = "";
+
+  if (availableParams.length === 0) {
+    // No available params - just show the manual add button section
+    const emptyMsg = document.createElement("small");
+    emptyMsg.className = "available-params-empty";
+    emptyMsg.textContent = "No query parameters available for this endpoint.";
+    queryParamsContainer.appendChild(emptyMsg);
+    return;
+  }
+
+  // Create "Available Parameters" section
+  const availableSection = document.createElement("div");
+  availableSection.className = "available-params-section";
+  availableSection.innerHTML = `<div class="available-params-header">Available Query Parameters:</div>`;
+
+  // Add each available param as a button
+  for (const param of availableParams) {
+    const paramBtn = document.createElement("button");
+    paramBtn.type = "button";
+    paramBtn.className = "available-param-btn";
+    paramBtn.innerHTML = `<span class="param-key">${escapeHtml(param.key)}</span><span class="param-desc">${escapeHtml(param.description)}</span>`;
+    paramBtn.addEventListener("click", () => {
+      // Check if already added
+      const rows = queryParamsContainer.querySelectorAll(".param-row");
+      for (const row of rows) {
+        const keyInput = row.querySelector('[data-role="key"]');
+        if (keyInput && keyInput.value === param.key) {
+          // Already added, just focus on the value input
+          const valueInput = row.querySelector('[data-role="value"]');
+          if (valueInput) valueInput.focus();
+          return;
+        }
+      }
+      // Not added yet, create new row
+      const newRow = createQueryRow(param.key, "");
+      queryParamsContainer.appendChild(newRow);
+      const valueInput = newRow.querySelector('[data-role="value"]');
+      if (valueInput) valueInput.focus();
+    });
+    availableSection.appendChild(paramBtn);
+  }
+
+  queryParamsContainer.appendChild(availableSection);
+
+  // Re-add existing param rows after the available params section
+  for (const row of existingRows) {
+    queryParamsContainer.appendChild(row);
+  }
 }
 
 endpointPickerBtn.addEventListener("click", (e) => {
@@ -566,11 +921,19 @@ document.addEventListener("keydown", (e) => {
 });
 
 addQueryParamBtn.addEventListener("click", () => {
-  queryParamsContainer.appendChild(createQueryRow());
+  const newRow = createQueryRow();
+  queryParamsContainer.appendChild(newRow);
+  const keyInput = newRow.querySelector('[data-role="key"]');
+  if (keyInput) keyInput.focus();
 });
 
 urlTemplateEl.addEventListener("input", () => {
   renderPathParams();
+  renderAvailableQueryParams();
+});
+
+methodEl.addEventListener("change", () => {
+  renderAvailableQueryParams();
 });
 
 sendBtn.addEventListener("click", sendRequest);
@@ -589,8 +952,8 @@ defaultBotIdEl.addEventListener("input", () => {
   renderPathParams();
 });
 
-queryParamsContainer.appendChild(createQueryRow());
 applyStoredUserConfig();
 applyEnvHints();
 renderPathParams();
+renderAvailableQueryParams();
 initTheme();

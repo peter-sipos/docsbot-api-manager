@@ -1,0 +1,1389 @@
+{
+  "apiDocumentation": {
+    "baseUrl": "https://api.docsbot.ai",
+    "adminBaseUrl": "https://docsbot.ai/api",
+    "authentication": {
+      "type": "Bearer",
+      "header": "Authorization: Bearer YOUR_API_KEY",
+      "notes": "API keys should be used server-side only and never exposed in client-side JavaScript"
+    },
+    "endpoints": {
+      "chatAgent": {
+        "name": "Chat Agent API",
+        "url": "POST https://api.docsbot.ai/teams/{teamId}/bots/{botId}/chat-agent",
+        "method": "POST",
+        "status": "current",
+        "description": "Primary chat endpoint with streaming, multimodal support, and advanced agent capabilities",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "type": "string",
+            "required": true,
+            "description": "UUID to maintain chat context; change to start new conversation"
+          },
+          {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "description": "User query (2-500 chars; 8K tokens/32k chars when authenticated)"
+          },
+          {
+            "name": "stream",
+            "type": "boolean",
+            "required": false,
+            "default": false,
+            "description": "Enable SSE streaming"
+          },
+          {
+            "name": "metadata",
+            "type": "object",
+            "required": false,
+            "description": "User identification data; keys 'name', 'email', 'referrer' logged"
+          },
+          {
+            "name": "context_items",
+            "type": "integer",
+            "required": false,
+            "default": 5,
+            "description": "Sources for retrieval; context boost uses 16"
+          },
+          {
+            "name": "document_retriever",
+            "type": "boolean",
+            "required": false,
+            "default": true,
+            "description": "Enable document lookup"
+          },
+          {
+            "name": "human_escalation",
+            "type": "boolean",
+            "required": false,
+            "default": false,
+            "description": "Enable escalation detection"
+          },
+          {
+            "name": "followup_rating",
+            "type": "boolean",
+            "required": false,
+            "default": false,
+            "description": "Include feedback tool"
+          },
+          {
+            "name": "full_source",
+            "type": "boolean",
+            "required": false,
+            "default": false,
+            "description": "Return complete source content"
+          },
+          {
+            "name": "autocut",
+            "type": "integer or boolean",
+            "required": false,
+            "default": false,
+            "description": "Group results"
+          },
+          {
+            "name": "testing",
+            "type": "boolean",
+            "required": false,
+            "default": false,
+            "description": "Mark as testing"
+          },
+          {
+            "name": "image_urls",
+            "type": "array",
+            "required": false,
+            "description": "Image URLs for multimodal context (requires compatible models)"
+          },
+          {
+            "name": "model",
+            "type": "string",
+            "required": false,
+            "description": "Override bot model (requires OpenAI API key)",
+            "examples": ["gpt-4o", "gpt-4.1"]
+          },
+          {
+            "name": "default_language",
+            "type": "string",
+            "required": false,
+            "description": "Locale code for unclear language detection",
+            "examples": ["en", "en-US"]
+          },
+          {
+            "name": "reasoning_effort",
+            "type": "string",
+            "required": false,
+            "enum": ["none", "minimal", "low", "medium", "high"],
+            "description": "Reasoning depth (model-dependent)"
+          },
+          {
+            "name": "search_limit",
+            "type": "integer",
+            "required": false,
+            "default": 2,
+            "description": "Max documentation searches (1-4)"
+          }
+        ],
+        "responses": [
+          {
+            "event": "lookup_answer",
+            "dataFields": ["answer", "history", "sources", "id", "couldAnswer"],
+            "description": "Most common for general questions"
+          },
+          {
+            "event": "answer",
+            "dataFields": ["answer", "history"],
+            "description": "Simple response without tools"
+          },
+          {
+            "event": "is_resolved_question",
+            "dataFields": ["answer", "history", "options"],
+            "description": "Feedback collection post-answer"
+          },
+          {
+            "event": "support_escalation",
+            "dataFields": ["answer", "history", "options"],
+            "description": "Human escalation confirmation"
+          },
+          {
+            "event": "stream",
+            "dataFields": ["text"],
+            "description": "Individual tokens during answer generation"
+          },
+          {
+            "event": "tool_call",
+            "dataFields": ["name", "params"],
+            "description": "Tool invocation details"
+          },
+          {
+            "event": "reasoning",
+            "dataFields": ["text"],
+            "description": "Reasoning summary (GPT-5 family only)"
+          }
+        ],
+        "errorCodes": [
+          {"code": 400, "description": "Invalid parameters or unsupported features"},
+          {"code": 403, "description": "Authentication/API key error"},
+          {"code": 404, "description": "Invalid bot ID"},
+          {"code": 409, "description": "Bot not ready"},
+          {"code": 413, "description": "Question exceeds length limit"},
+          {"code": 429, "description": "Rate limit or team quota exceeded"},
+          {"code": 500, "description": "Server error"}
+        ]
+      },
+      "chatLegacy": {
+        "name": "Chat API (Legacy)",
+        "url": "POST https://api.docsbot.ai/teams/{teamId}/bots/{botId}/chat",
+        "method": "POST",
+        "status": "deprecated",
+        "description": "Legacy chat endpoint - use Chat Agent API instead",
+        "parameters": [
+          {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "description": "Query text (2-500 characters, or unlimited when authenticated)"
+          },
+          {
+            "name": "full_source",
+            "type": "boolean",
+            "required": false,
+            "default": false,
+            "description": "Include complete source content in response"
+          },
+          {
+            "name": "format",
+            "type": "string",
+            "required": false,
+            "default": "markdown",
+            "enum": ["markdown", "text"],
+            "description": "Response format"
+          },
+          {
+            "name": "history",
+            "type": "array",
+            "required": false,
+            "default": [],
+            "description": "Previous conversation exchanges"
+          },
+          {
+            "name": "metadata",
+            "type": "object",
+            "required": false,
+            "default": null,
+            "description": "User identification data; keys like 'referrer', 'email', 'name' appear in logs"
+          },
+          {
+            "name": "testing",
+            "type": "boolean",
+            "required": false,
+            "default": false,
+            "description": "Mark queries as staff-generated"
+          },
+          {
+            "name": "context_items",
+            "type": "integer",
+            "required": false,
+            "default": 5,
+            "description": "Number of source results to retrieve (context boost: 16)"
+          },
+          {
+            "name": "autocut",
+            "type": "integer or false",
+            "required": false,
+            "default": false,
+            "description": "Organize results into groups; returns top N groups"
+          }
+        ]
+      },
+      "streamingChatLegacy": {
+        "name": "Streaming Chat API (Legacy)",
+        "url": "wss://api.docsbot.ai/teams/{teamId}/bots/{botId}/chat",
+        "method": "WebSocket",
+        "status": "deprecated",
+        "description": "Legacy WebSocket streaming endpoint - use Chat Agent API with stream parameter instead",
+        "parameters": [
+          {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "description": "The question to ask the bot. 2 to 2000 characters."
+          },
+          {
+            "name": "history",
+            "type": "array",
+            "required": false,
+            "default": [],
+            "description": "The chat history array"
+          },
+          {
+            "name": "auth",
+            "type": "string",
+            "required": false,
+            "description": "The API key. Required only for private bots."
+          },
+          {
+            "name": "full_source",
+            "type": "boolean",
+            "required": false,
+            "default": false,
+            "description": "Whether to return complete source content"
+          },
+          {
+            "name": "format",
+            "type": "string",
+            "required": false,
+            "default": "markdown",
+            "enum": ["markdown", "text"],
+            "description": "Answer format"
+          },
+          {
+            "name": "metadata",
+            "type": "object",
+            "required": false,
+            "description": "User identification data; keys 'referrer', 'email', 'name' logged"
+          },
+          {
+            "name": "testing",
+            "type": "boolean",
+            "required": false,
+            "default": false,
+            "description": "Mark logs as staff questions"
+          },
+          {
+            "name": "context_items",
+            "type": "integer",
+            "required": false,
+            "default": 5,
+            "description": "Number of sources to retrieve (boost uses 16)"
+          },
+          {
+            "name": "autocut",
+            "type": "integer or false",
+            "required": false,
+            "default": false,
+            "description": "Group results by relevance jumps"
+          }
+        ],
+        "messageTypes": [
+          {"type": "start", "description": "Signals answer streaming begins"},
+          {"type": "stream", "description": "Partial response chunks (repeats multiple times)"},
+          {"type": "info", "description": "Status updates (rarely used)"},
+          {"type": "end", "description": "Final response with full answer and sources"},
+          {"type": "error", "description": "Error notification"}
+        ]
+      },
+      "conversationSummarize": {
+        "name": "Conversation Summarize",
+        "url": "GET https://api.docsbot.ai/teams/{teamId}/bots/{botId}/conversations/{conversationId}/summarize",
+        "method": "GET",
+        "description": "Generate summary, title, and sentiment analysis for a conversation (Chat Agent API only)",
+        "parameters": [],
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "The team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "The bot identifier"},
+          {"name": "conversationId", "type": "string", "required": true, "description": "The conversation to be summarized"}
+        ],
+        "response": {
+          "title": "Short title of the conversation, one short sentence maximum",
+          "summary": "Plain text formatted summary content",
+          "sentiment": {
+            "type": "string",
+            "enum": ["positive", "neutral", "negative"]
+          }
+        },
+        "errorCodes": [
+          {"code": 400, "description": "Invalid or missing conversation ID"},
+          {"code": 401, "description": "Authentication required (private bot)"},
+          {"code": 402, "description": "Feature requires Standard plan or higher"},
+          {"code": 403, "description": "Access denied"},
+          {"code": 404, "description": "Resource not found"},
+          {"code": 422, "description": "Invalid parameters"},
+          {"code": 500, "description": "Server error"}
+        ]
+      },
+      "conversationTicket": {
+        "name": "Conversation Ticket Creation",
+        "url": "GET https://api.docsbot.ai/teams/{teamId}/bots/{botId}/conversations/{conversationId}/ticket",
+        "method": "GET",
+        "description": "Generate support ticket subject and message from conversation (Chat Agent API only)",
+        "parameters": [],
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Identifies the team"},
+          {"name": "botId", "type": "string", "required": true, "description": "Identifies the bot"},
+          {"name": "conversationId", "type": "string", "required": true, "description": "Identifies the conversation for ticket generation"}
+        ],
+        "response": {
+          "subject": "Support ticket subject line",
+          "message": "Detailed ticket content from the point of view of the user"
+        },
+        "errorCodes": [
+          {"code": 400, "description": "Invalid or missing conversation ID"},
+          {"code": 401, "description": "Missing authentication credentials"},
+          {"code": 402, "description": "Feature unavailable below Standard plan"},
+          {"code": 403, "description": "Access denied to conversation"},
+          {"code": 404, "description": "Resource not found"},
+          {"code": 422, "description": "Invalid parameters"},
+          {"code": 500, "description": "Server error"}
+        ]
+      },
+      "conversationLead": {
+        "name": "Conversation Lead Capture",
+        "url": "POST https://api.docsbot.ai/teams/{teamId}/bots/{botId}/conversations/{conversationId}/lead",
+        "method": "POST",
+        "description": "Capture lead information associated with a conversation",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"},
+          {"name": "conversationId", "type": "string", "required": true, "description": "Conversation UUID for lead association"}
+        ],
+        "parameters": [
+          {
+            "name": "metadata",
+            "type": "object",
+            "required": true,
+            "description": "Key-value pairs containing lead information. Can include any fields",
+            "commonFields": ["email", "name", "company", "phone"]
+          }
+        ],
+        "response": {
+          "type": "boolean",
+          "value": true
+        },
+        "errorCodes": [
+          {"code": 404, "description": "Invalid bot_id"},
+          {"code": 403, "description": "Authentication failed"},
+          {"code": 500, "description": "Server error"}
+        ]
+      },
+      "answerRating": {
+        "name": "Answer Rating",
+        "url": "PUT https://api.docsbot.ai/teams/{teamId}/bots/{botId}/rate/{answerId}",
+        "method": "PUT",
+        "description": "Record user satisfaction feedback for an answer",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"},
+          {"name": "answerId", "type": "string", "required": true, "description": "Answer identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "rating",
+            "type": "integer",
+            "required": true,
+            "enum": [-1, 0, 1],
+            "description": "Values: -1 (negative), 0 (neutral), 1 (positive)"
+          }
+        ],
+        "response": {
+          "type": "boolean",
+          "value": true
+        }
+      },
+      "supportEscalation": {
+        "name": "Support Escalation",
+        "url": "PUT https://api.docsbot.ai/teams/{teamId}/bots/{botId}/support/{answerId}",
+        "method": "PUT",
+        "description": "Log when a user escalates a chat to human support",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"},
+          {"name": "answerId", "type": "string", "required": true, "description": "Answer identifier"}
+        ],
+        "parameters": [],
+        "response": {
+          "type": "boolean",
+          "value": true
+        }
+      },
+      "semanticSearch": {
+        "name": "Semantic Search",
+        "url": "POST https://api.docsbot.ai/teams/{teamId}/bots/{botId}/search",
+        "method": "POST",
+        "description": "Search bot's knowledge base using hybrid semantic and keyword search",
+        "parameters": [
+          {
+            "name": "query",
+            "type": "string",
+            "required": true,
+            "description": "The query to search for"
+          },
+          {
+            "name": "top_k",
+            "type": "integer",
+            "required": false,
+            "default": 4,
+            "description": "The number of source chunks to return"
+          },
+          {
+            "name": "autocut",
+            "type": "integer or false",
+            "required": false,
+            "default": false,
+            "description": "Autocut results to num groups. Organizes results by distance jumps."
+          },
+          {
+            "name": "alpha",
+            "type": "float",
+            "required": false,
+            "default": 0.75,
+            "description": "Balance between keyword (0) and semantic (1) search components"
+          },
+          {
+            "name": "use_glossary",
+            "type": "boolean",
+            "required": false,
+            "default": false,
+            "description": "Use the bot's glossary for term replacement"
+          }
+        ],
+        "response": {
+          "type": "array",
+          "description": "Array of source objects",
+          "sourceFields": ["type", "title", "url", "page", "content"]
+        }
+      },
+      "teamsList": {
+        "name": "List Teams",
+        "url": "GET https://docsbot.ai/api/teams",
+        "method": "GET",
+        "description": "Get all teams accessible to the authenticated user",
+        "parameters": [],
+        "response": {
+          "type": "array",
+          "fields": ["id", "name", "createdAt", "status", "questionCount", "pageCount", "sourceCount", "chunkCount", "botCount", "openAIKey", "plan", "roles"]
+        }
+      },
+      "teamGet": {
+        "name": "Get Team",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}",
+        "method": "GET",
+        "description": "Get details for a specific team",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"}
+        ],
+        "parameters": []
+      },
+      "teamUpdate": {
+        "name": "Update Team",
+        "url": "PUT https://docsbot.ai/api/teams/{teamId}",
+        "method": "PUT",
+        "description": "Update team settings",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": false,
+            "description": "New team name"
+          },
+          {
+            "name": "openAIKey",
+            "type": "string",
+            "required": false,
+            "description": "OpenAI API key for bots"
+          }
+        ]
+      },
+      "teamMembersList": {
+        "name": "List Team Members",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/members",
+        "method": "GET",
+        "description": "Get all members of a team",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"}
+        ],
+        "parameters": [],
+        "response": {
+          "type": "array",
+          "fields": ["uid", "displayName", "email", "photoURL", "role"]
+        }
+      },
+      "teamMemberUpdate": {
+        "name": "Update Team Member Role",
+        "url": "PUT https://docsbot.ai/api/teams/{teamId}/members",
+        "method": "PUT",
+        "description": "Update a team member's role",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "memberId",
+            "type": "string",
+            "required": true,
+            "description": "Member identifier"
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "required": true,
+            "enum": ["admin", "member"],
+            "description": "New role for member"
+          }
+        ]
+      },
+      "teamMemberRemove": {
+        "name": "Remove Team Member or Invite",
+        "url": "DELETE https://docsbot.ai/api/teams/{teamId}/members",
+        "method": "DELETE",
+        "description": "Remove a team member or pending invite",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "removeUserId",
+            "type": "string",
+            "required": false,
+            "description": "User ID to remove (one of removeUserId or removeUserEmail required)"
+          },
+          {
+            "name": "removeUserEmail",
+            "type": "string",
+            "required": false,
+            "description": "User email to remove (one of removeUserId or removeUserEmail required)"
+          }
+        ]
+      },
+      "teamMemberInvite": {
+        "name": "Invite a Team Member",
+        "url": "POST https://docsbot.ai/api/teams/{teamId}/invite",
+        "method": "POST",
+        "description": "Send an invitation to join the team",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "inviteEmail",
+            "type": "string",
+            "required": true,
+            "description": "Email address to invite"
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "required": true,
+            "enum": ["admin", "member"],
+            "description": "Role for invited member"
+          }
+        ]
+      },
+      "teamInviteRespond": {
+        "name": "Respond to an Invite",
+        "url": "PUT https://docsbot.ai/api/teams/{teamId}/invite",
+        "method": "PUT",
+        "description": "Accept, deny, or retry a team invitation",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "enum": ["accept", "deny", "retry"],
+            "description": "Response to invitation"
+          },
+          {
+            "name": "teamId",
+            "type": "string",
+            "required": true,
+            "description": "Team identifier"
+          },
+          {
+            "name": "inviteId",
+            "type": "string",
+            "required": true,
+            "description": "Invitation identifier"
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "required": true,
+            "description": "Role from invitation"
+          }
+        ]
+      },
+      "botsList": {
+        "name": "List Bots",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots",
+        "method": "GET",
+        "description": "Get all bots in a team",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"}
+        ],
+        "parameters": [],
+        "response": {
+          "type": "array",
+          "fields": ["id", "name", "description", "privacy", "model", "language", "status", "questionCount", "pageCount", "sourceCount", "chunkCount", "createdAt"]
+        }
+      },
+      "botGet": {
+        "name": "Get Bot",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots/{botId}",
+        "method": "GET",
+        "description": "Get details for a specific bot",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"}
+        ],
+        "parameters": []
+      },
+      "botCreate": {
+        "name": "Create Bot",
+        "url": "POST https://docsbot.ai/api/teams/{teamId}/bots",
+        "method": "POST",
+        "description": "Create a new bot",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "The bot name. Used publically"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "required": true,
+            "description": "Shown by default in embeds and share links"
+          },
+          {
+            "name": "privacy",
+            "type": "string",
+            "required": true,
+            "enum": ["public", "private"],
+            "description": "Bot visibility"
+          },
+          {
+            "name": "language",
+            "type": "string",
+            "required": true,
+            "enum": ["en", "jp"],
+            "description": "Bot language (additional languages available)"
+          },
+          {
+            "name": "model",
+            "type": "string",
+            "required": false,
+            "default": "gpt-4o-mini",
+            "description": "LLM model to use",
+            "examples": ["gpt-4.1", "gpt-4o"]
+          },
+          {
+            "name": "embeddingModel",
+            "type": "string",
+            "required": false,
+            "description": "Embedding model for search",
+            "examples": ["text-embedding-3-small", "text-embedding-3-large", "embed-v4.0"]
+          },
+          {
+            "name": "copyFrom",
+            "type": "string",
+            "required": false,
+            "description": "Existing bot ID to duplicate"
+          }
+        ]
+      },
+      "botUpdate": {
+        "name": "Update Bot",
+        "url": "PUT https://docsbot.ai/api/teams/{teamId}/bots/{botId}",
+        "method": "PUT",
+        "description": "Update bot settings",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": false,
+            "description": "Bot name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "required": false,
+            "description": "Bot description"
+          },
+          {
+            "name": "customPrompt",
+            "type": "string",
+            "required": false,
+            "description": "Custom system prompt"
+          },
+          {
+            "name": "privacy",
+            "type": "string",
+            "required": false,
+            "enum": ["public", "private"],
+            "description": "Bot visibility"
+          },
+          {
+            "name": "language",
+            "type": "string",
+            "required": false,
+            "description": "Bot language"
+          },
+          {
+            "name": "model",
+            "type": "string",
+            "required": false,
+            "description": "LLM model"
+          },
+          {
+            "name": "allowedDomains",
+            "type": "array",
+            "required": false,
+            "description": "Array of allowed domain strings"
+          },
+          {
+            "name": "color",
+            "type": "string",
+            "required": false,
+            "description": "Widget color in hex format (e.g., '#FFFFFF')"
+          },
+          {
+            "name": "icon",
+            "type": "string",
+            "required": false,
+            "enum": ["default", "comments", "robot", "life-ring", "question", "book"],
+            "description": "Widget icon"
+          },
+          {
+            "name": "alignment",
+            "type": "string",
+            "required": false,
+            "enum": ["left", "right"],
+            "description": "Widget alignment"
+          },
+          {
+            "name": "botIcon",
+            "type": "string",
+            "required": false,
+            "enum": ["false", "comment", "robot", "life-ring", "info", "book"],
+            "description": "Bot avatar icon"
+          },
+          {
+            "name": "branding",
+            "type": "boolean",
+            "required": false,
+            "description": "Show DocsBot branding"
+          },
+          {
+            "name": "supportLink",
+            "type": "string",
+            "required": false,
+            "description": "Support link URL (empty disables)"
+          },
+          {
+            "name": "showButtonLabel",
+            "type": "string",
+            "required": false,
+            "description": "Custom button label text"
+          },
+          {
+            "name": "showCopyButton",
+            "type": "boolean",
+            "required": false,
+            "description": "Show copy button in responses"
+          },
+          {
+            "name": "labels",
+            "type": "object",
+            "required": false,
+            "description": "Object with customizable UI text"
+          }
+        ]
+      },
+      "botDelete": {
+        "name": "Delete Bot",
+        "url": "DELETE https://docsbot.ai/api/teams/{teamId}/bots/{botId}",
+        "method": "DELETE",
+        "description": "Delete a bot permanently",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"}
+        ],
+        "parameters": []
+      },
+      "sourcesList": {
+        "name": "List Sources",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots/{botId}/sources",
+        "method": "GET",
+        "description": "Get all sources for a bot",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"}
+        ],
+        "parameters": [],
+        "response": {
+          "type": "array",
+          "fields": ["id", "file", "type", "url", "createdAt", "pageCount", "chunkCount", "title", "status"]
+        }
+      },
+      "sourceGet": {
+        "name": "Get Source",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots/{botId}/sources/{sourceId}",
+        "method": "GET",
+        "description": "Get details for a specific source",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"},
+          {"name": "sourceId", "type": "string", "required": true, "description": "Source identifier"}
+        ],
+        "parameters": []
+      },
+      "sourceCreate": {
+        "name": "Create Source",
+        "url": "POST https://docsbot.ai/api/teams/{teamId}/bots/{botId}/sources",
+        "method": "POST",
+        "description": "Add a new data source to a bot",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "type": "string",
+            "required": true,
+            "enum": ["url", "document", "sitemap", "wp", "urls", "csv", "rss", "qa", "youtube"],
+            "description": "Type of data source"
+          },
+          {
+            "name": "title",
+            "type": "string",
+            "required": false,
+            "description": "Required for document type only"
+          },
+          {
+            "name": "url",
+            "type": "string",
+            "required": false,
+            "description": "Required for url, sitemap, youtube, rss types"
+          },
+          {
+            "name": "file",
+            "type": "string",
+            "required": false,
+            "description": "Required for urls, csv, document, wp types (cloud storage path)"
+          },
+          {
+            "name": "faqs",
+            "type": "array",
+            "required": false,
+            "description": "Required for qa type; format: [{question:'text', answer:'text'}]"
+          },
+          {
+            "name": "scheduleInterval",
+            "type": "string",
+            "required": false,
+            "default": "none",
+            "enum": ["daily", "weekly", "monthly", "none"],
+            "description": "Auto-refresh schedule"
+          }
+        ]
+      },
+      "sourceRetry": {
+        "name": "Retry Source",
+        "url": "PUT https://docsbot.ai/api/teams/{teamId}/bots/{botId}/sources/{sourceId}",
+        "method": "PUT",
+        "description": "Retry indexing a failed source",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"},
+          {"name": "sourceId", "type": "string", "required": true, "description": "Source identifier"}
+        ],
+        "parameters": []
+      },
+      "sourceDelete": {
+        "name": "Delete Source",
+        "url": "DELETE https://docsbot.ai/api/teams/{teamId}/bots/{botId}/sources/{sourceId}",
+        "method": "DELETE",
+        "description": "Delete a source permanently",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"},
+          {"name": "sourceId", "type": "string", "required": true, "description": "Source identifier"}
+        ],
+        "parameters": []
+      },
+      "uploadUrl": {
+        "name": "Upload Presigned URL",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots/{botId}/upload-url",
+        "method": "GET",
+        "description": "Get presigned URL for file uploads",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "fileName",
+            "type": "string",
+            "required": true,
+            "description": "Name of file to upload"
+          }
+        ]
+      },
+      "questionsList": {
+        "name": "List Questions",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots/{botId}/questions",
+        "method": "GET",
+        "description": "Get question and answer history",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "type": "number",
+            "required": false,
+            "default": 0,
+            "description": "The page number to return. Pages are 0-indexed."
+          },
+          {
+            "name": "perPage",
+            "type": "number",
+            "required": false,
+            "default": 50,
+            "description": "The number of questions to return per page"
+          },
+          {
+            "name": "ip",
+            "type": "string",
+            "required": false,
+            "description": "Filter by SHA256-hashed IP address"
+          },
+          {
+            "name": "rating",
+            "type": "integer",
+            "required": false,
+            "default": null,
+            "enum": [-1, 0, 1],
+            "description": "Values: -1 (down), 0 (neutral), 1 (up)"
+          },
+          {
+            "name": "escalated",
+            "type": "boolean",
+            "required": false,
+            "default": null,
+            "description": "Filter by escalation status"
+          },
+          {
+            "name": "couldAnswer",
+            "type": "boolean",
+            "required": false,
+            "default": null,
+            "description": "Filter by bot's capability to answer"
+          },
+          {
+            "name": "startDate",
+            "type": "string",
+            "required": false,
+            "description": "A parsable datetime string like '2023-10-01' or '2023-09-29T15:12:46.335Z'"
+          },
+          {
+            "name": "endDate",
+            "type": "string",
+            "required": false,
+            "description": "A parsable datetime string like '2023-10-01' or '2023-09-29T15:12:46.335Z'"
+          }
+        ]
+      },
+      "questionDelete": {
+        "name": "Delete Question",
+        "url": "DELETE https://docsbot.ai/api/teams/{teamId}/bots/{botId}/questions/{questionId}",
+        "method": "DELETE",
+        "description": "Soft delete a question (flagged as deleted, content cleared)",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"},
+          {"name": "questionId", "type": "string", "required": true, "description": "Question identifier"}
+        ],
+        "parameters": []
+      },
+      "conversationsList": {
+        "name": "List Conversations",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots/{botId}/conversations",
+        "method": "GET",
+        "description": "Get conversation history",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "type": "number",
+            "required": false,
+            "default": 0,
+            "description": "The page number to return. Pages are 0-indexed."
+          },
+          {
+            "name": "perPage",
+            "type": "number",
+            "required": false,
+            "default": 25,
+            "description": "The number of conversations to return per page"
+          }
+        ]
+      },
+      "conversationGet": {
+        "name": "Get Single Conversation",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots/{botId}/conversations/{conversationId}",
+        "method": "GET",
+        "description": "Get complete conversation details including message history",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"},
+          {"name": "conversationId", "type": "string", "required": true, "description": "Conversation identifier"}
+        ],
+        "parameters": []
+      },
+      "conversationDelete": {
+        "name": "Delete Conversation",
+        "url": "DELETE https://docsbot.ai/api/teams/{teamId}/bots/{botId}/conversations/{conversationId}",
+        "method": "DELETE",
+        "description": "Delete a conversation permanently (requires edit permissions)",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"},
+          {"name": "conversationId", "type": "string", "required": true, "description": "Conversation identifier"}
+        ],
+        "parameters": []
+      },
+      "leadsList": {
+        "name": "List Leads",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots/{botId}/leads",
+        "method": "GET",
+        "description": "Get captured leads",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "type": "number",
+            "required": false,
+            "default": 0,
+            "description": "0-indexed page number"
+          },
+          {
+            "name": "perPage",
+            "type": "number",
+            "required": false,
+            "default": 50,
+            "description": "Results per page"
+          },
+          {
+            "name": "startDate",
+            "type": "string",
+            "required": false,
+            "description": "Filter by lead createdAt start time (ISO datetime or parsable date)"
+          },
+          {
+            "name": "endDate",
+            "type": "string",
+            "required": false,
+            "description": "Filter by lead createdAt end time (ISO datetime or parsable date)"
+          }
+        ]
+      },
+      "leadsExport": {
+        "name": "Export Leads CSV",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots/{botId}/leads/export",
+        "method": "GET",
+        "description": "Export leads as CSV file",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "startDate",
+            "type": "string",
+            "required": true,
+            "description": "Start datetime for createdAt filter"
+          },
+          {
+            "name": "endDate",
+            "type": "string",
+            "required": true,
+            "description": "End datetime for createdAt filter"
+          }
+        ]
+      },
+      "leadDelete": {
+        "name": "Delete Lead",
+        "url": "DELETE https://docsbot.ai/api/teams/{teamId}/bots/{botId}/leads/{leadId}",
+        "method": "DELETE",
+        "description": "Delete a lead permanently",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"},
+          {"name": "leadId", "type": "string", "required": true, "description": "Lead identifier"}
+        ],
+        "parameters": []
+      },
+      "webhooksList": {
+        "name": "List Webhooks",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots/{botId}/webhooks",
+        "method": "GET",
+        "description": "Get all webhooks for a bot",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"}
+        ],
+        "parameters": [],
+        "response": {
+          "type": "array",
+          "fields": ["id", "targetUrl", "events", "status", "expirationDate"]
+        }
+      },
+      "webhookCreate": {
+        "name": "Create Webhook",
+        "url": "POST https://docsbot.ai/api/teams/{teamId}/bots/{botId}/webhooks",
+        "method": "POST",
+        "description": "Create a new webhook",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "targetUrl",
+            "type": "string",
+            "required": true,
+            "description": "Destination URL"
+          },
+          {
+            "name": "events",
+            "type": "array",
+            "required": true,
+            "enum": ["lead.created", "deep_research.done", "conversation.escalated", "conversation.rated"],
+            "description": "Event types to listen for"
+          },
+          {
+            "name": "label",
+            "type": "string",
+            "required": false,
+            "description": "Webhook identifier"
+          },
+          {
+            "name": "source",
+            "type": "string",
+            "required": false,
+            "description": "Integration source (e.g., 'zapier')"
+          },
+          {
+            "name": "expirationDate",
+            "type": "string",
+            "required": false,
+            "description": "Webhook expiration (ISO 8601 format)"
+          }
+        ]
+      },
+      "webhookGet": {
+        "name": "Get Single Webhook",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots/{botId}/webhooks/{webhookId}",
+        "method": "GET",
+        "description": "Get details for a specific webhook",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"},
+          {"name": "webhookId", "type": "string", "required": true, "description": "Webhook identifier"}
+        ],
+        "parameters": []
+      },
+      "webhookUpdate": {
+        "name": "Update Webhook",
+        "url": "PATCH https://docsbot.ai/api/teams/{teamId}/bots/{botId}/webhooks/{webhookId}",
+        "method": "PATCH",
+        "description": "Update webhook settings",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"},
+          {"name": "webhookId", "type": "string", "required": true, "description": "Webhook identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "type": "string",
+            "required": false,
+            "description": "Webhook status"
+          },
+          {
+            "name": "targetUrl",
+            "type": "string",
+            "required": false,
+            "description": "Destination URL"
+          },
+          {
+            "name": "label",
+            "type": "string",
+            "required": false,
+            "description": "Webhook identifier"
+          },
+          {
+            "name": "expirationDate",
+            "type": "string",
+            "required": false,
+            "description": "Expiration date"
+          }
+        ]
+      },
+      "webhookDelete": {
+        "name": "Delete Webhook",
+        "url": "DELETE https://docsbot.ai/api/teams/{teamId}/bots/{botId}/webhooks/{webhookId}",
+        "method": "DELETE",
+        "description": "Delete a webhook permanently",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"},
+          {"name": "webhookId", "type": "string", "required": true, "description": "Webhook identifier"}
+        ],
+        "parameters": []
+      },
+      "researchJobsList": {
+        "name": "List Research Jobs",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots/{botId}/research",
+        "method": "GET",
+        "description": "Get all deep research jobs for a bot",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "type": "number",
+            "required": false,
+            "description": "The page number to return. Pages are 0-indexed."
+          },
+          {
+            "name": "perPage",
+            "type": "number",
+            "required": false,
+            "description": "The number of jobs to return per page"
+          }
+        ]
+      },
+      "researchJobGet": {
+        "name": "Get Research Job Details",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots/{botId}/research/{jobId}",
+        "method": "GET",
+        "description": "Get details for a specific research job",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"},
+          {"name": "jobId", "type": "string", "required": true, "description": "Research job identifier"}
+        ],
+        "parameters": [],
+        "response": {
+          "fields": ["jobId", "status", "title", "question", "response", "createdAt", "completedAt", "cancelledAt"],
+          "statusValues": ["queued", "running", "completed"]
+        }
+      },
+      "botStats": {
+        "name": "Get Bot Statistics",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots/{botId}/stats",
+        "method": "GET",
+        "description": "Get analytics and performance statistics for a bot",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "timeDelta",
+            "type": "number",
+            "required": false,
+            "description": "The time period in days to analyze. Common values: 7 (week), 30 (month), 90 (quarter), 365 (year)"
+          },
+          {
+            "name": "startDate",
+            "type": "string",
+            "required": false,
+            "description": "Start of date range (ISO 8601 or YYYY-MM-DD). Must be provided together with endDate"
+          },
+          {
+            "name": "endDate",
+            "type": "string",
+            "required": false,
+            "description": "End of date range (ISO 8601 or YYYY-MM-DD). Must be provided together with startDate"
+          }
+        ],
+        "notes": "Either timeDelta OR both startDate and endDate should be provided. If explicit dates are valid, they take precedence; otherwise falls back to timeDelta (defaults to 30 days)."
+      },
+      "botReports": {
+        "name": "Bot Reports (Monthly)",
+        "url": "GET https://docsbot.ai/api/teams/{teamId}/bots/{botId}/reports",
+        "method": "GET",
+        "description": "Get monthly summary reports for a bot",
+        "pathParameters": [
+          {"name": "teamId", "type": "string", "required": true, "description": "Team identifier"},
+          {"name": "botId", "type": "string", "required": true, "description": "Bot identifier"}
+        ],
+        "parameters": [
+          {
+            "name": "month",
+            "type": "string",
+            "required": false,
+            "description": "The report month to fetch (format YYYY-MM). Defaults to the latest report."
+          }
+        ]
+      }
+    }
+  }
+}
